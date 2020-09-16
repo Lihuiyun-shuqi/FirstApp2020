@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">FirstApp</string>
-    <string name="text1">Kylin</string>
-    <string name="button1">btn1</string>
-    <string name="button2">btn2</string>
+    <string name="app_name">Hello</string>
+    <string name="textView5">TeamA</string>
+    <string name="buttona">+1 POINT</string>
+    <string name="buttonb">+2 POINTS</string>
+    <string name="buttonc">+3 POINTS</string>
+    <string name="buttond">RESET</string>
 </resources>
