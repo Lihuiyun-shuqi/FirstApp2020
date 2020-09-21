@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">Hello</string>
-    <string name="textView5">TeamA</string>
-    <string name="buttona">+1 POINT</string>
+    <string name="app_name">CourtCounter</string>
+    <string name="textView1">TeamA</string>
+    <string name="textView3">TeamB</string>
+    <string name="buttona">+3 POINT</string>
     <string name="buttonb">+2 POINTS</string>
-    <string name="buttonc">+3 POINTS</string>
+    <string name="buttonc">FREE THROW</string>
     <string name="buttond">RESET</string>
 </resources>
