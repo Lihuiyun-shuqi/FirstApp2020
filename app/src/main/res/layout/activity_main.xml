@@ -8,30 +8,30 @@
     android:padding="30dp"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textView5"
+    <EditText
+        android:id="@+id/editTextNumberDecimal"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Input RMB"
         android:gravity="center"
-        android:textSize="30sp"
-        android:layout_marginTop="35dp"
         android:layout_marginBottom="20dp"
-        android:text="@string/textView5" />
+        android:inputType="numberDecimal" />
 
     <TextView
         android:id="@+id/textView6"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="60dp"
         android:gravity="center"
         android:textSize="40sp"
-        android:layout_marginBottom="65dp"
-        android:text="0"/>
+        android:layout_marginBottom="50dp"
+        android:text="@string/textView6"/>
 
     <Button
         android:id="@+id/buttona"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="35dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/buttona"
         android:onClick="btna"/>
 
@@ -39,7 +39,7 @@
         android:id="@+id/buttonb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="35dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/buttonb"
         android:onClick="btnb"/>
 
@@ -47,16 +47,15 @@
         android:id="@+id/buttonc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="70dp"
+        android:layout_marginBottom="50dp"
         android:text="@string/buttonc"
         android:onClick="btnc"/>
 
-    <Button
-        android:id="@+id/buttond"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/buttond"
-        android:onClick="reset"/>
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:textSize="20sp"/>
 
 </LinearLayout>

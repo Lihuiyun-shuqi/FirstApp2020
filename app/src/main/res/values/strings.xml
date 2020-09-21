@@ -1,8 +1,7 @@
 <resources>
-    <string name="app_name">Hello</string>
-    <string name="textView5">TeamA</string>
-    <string name="buttona">+1 POINT</string>
-    <string name="buttonb">+2 POINTS</string>
-    <string name="buttonc">+3 POINTS</string>
-    <string name="buttond">RESET</string>
+    <string name="app_name">CurrencyExchangeRateConverter</string>
+    <string name="textView6">Hello</string>
+    <string name="buttona">DOLLAR</string>
+    <string name="buttonb">EURO</string>
+    <string name="buttonc">WON</string>
 </resources>
