@@ -21,9 +21,9 @@
     <TextView
         android:id="@+id/textView6"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="80dp"
         android:gravity="center"
-        android:textSize="40sp"
+        android:textSize="20sp"
         android:layout_marginBottom="50dp"
         android:text="@string/textView6"/>
 
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="@string/buttona"
-        android:onClick="btna"/>
+        android:onClick="btn_convert"/>
 
     <Button
         android:id="@+id/buttonb"
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="@string/buttonb"
-        android:onClick="btnb"/>
+        android:onClick="btn_convert"/>
 
     <Button
         android:id="@+id/buttonc"
@@ -49,13 +49,15 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="50dp"
         android:text="@string/buttonc"
-        android:onClick="btnc"/>
+        android:onClick="btn_convert"/>
 
-    <TextView
-        android:id="@+id/textView"
+    <Button
+        android:id="@+id/btn_config"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:gravity="center"
-        android:textSize="20sp"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:onClick="open_new"
+        android:text="@string/btn_config" />
+
 
 </LinearLayout>

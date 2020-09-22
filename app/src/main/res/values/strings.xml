@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">CurrencyExchangeRateConverter</string>
-    <string name="textView6">Hello</string>
+    <string name="textView6">Currency Converter</string>
     <string name="buttona">DOLLAR</string>
     <string name="buttonb">EURO</string>
     <string name="buttonc">WON</string>
+    <string name="btn_config">CONFIG</string>
+    <string name="btn_save_config">SAVE</string>
+    <string name="menu1">Setting</string>
 </resources>
