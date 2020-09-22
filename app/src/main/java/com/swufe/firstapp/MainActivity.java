@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
         df = new DecimalFormat( "0.0000");//设置double类型小数点后位数格式
     }
     public void btn_convert(View btn){
-        if(edit.getText().toString()==""){
+        String ss = edit.getText().toString();
+        if(ss==null || ss.equals("") || ss.equals(R.string.textView6)){//no input
             Toast.makeText(this, "请输入人民币金额", Toast.LENGTH_SHORT).show();
         }else{
             double oc = Double.parseDouble(edit.getText().toString());
