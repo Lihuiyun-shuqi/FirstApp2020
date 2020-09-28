@@ -1,13 +1,10 @@
 <resources>
-    <string name="app_name">CourtCounter</string>
+    <string name="app_name">CurrencyExchangeRateConverter</string>
+    <string name="textView6">Currency Converter</string>
+    <string name="buttona">DOLLAR</string>
+    <string name="buttonb">EURO</string>
+    <string name="buttonc">WON</string>
+    <string name="btn_config">CONFIG</string>
+    <string name="btn_save_config">SAVE</string>
     <string name="menu1">Setting</string>
-    <string name="textview1">TeamA</string>
-    <string name="textview3">TeamB</string>
-    <string name="button1">+3 POINTS</string>
-    <string name="button2">+2 POINTS</string>
-    <string name="button3">FREE THROW</string>
-    <string name="button6">FREE THROW</string>
-    <string name="button4">+3 POINTS</string>
-    <string name="button5">+2 POINTS</string>
-    <string name="button7">RESET</string>
 </resources>
