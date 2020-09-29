@@ -1,2 +1,3 @@
+include ':javaTest'
 include ':app'
 rootProject.name = "FirstApp"

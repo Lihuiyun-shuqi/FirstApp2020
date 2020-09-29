@@ -14,6 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +33,7 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
     private static final String TAG = "MainActivity2";
     EditText dolRate,eurRate,woRate;
     Handler handler;
+    float new_dollar,new_euro,new_won;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +86,9 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
         eurRate = (EditText)findViewById(R.id.euroRate);
         woRate = (EditText)findViewById(R.id.wonRate);
 
-        float new_dollar = Float.parseFloat(dolRate.getText().toString());
-        float new_euro = Float.parseFloat(eurRate.getText().toString());
-        float new_won = Float.parseFloat(woRate.getText().toString());
+        new_dollar = Float.parseFloat(dolRate.getText().toString());
+        new_euro = Float.parseFloat(eurRate.getText().toString());
+        new_won = Float.parseFloat(woRate.getText().toString());
 
         //使用SharedPreferences对象保存数据
         SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
@@ -122,7 +128,13 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
     public void run() {
         Log.i(TAG,"run:run().....");
 
-        //获取网络数据
+        /*//获取msg对象，用于返回主线程
+        Message msg = handler.obtainMessage(5);
+        //msg.what = 5;
+        msg.obj = "Hello from run()";
+        handler.sendMessage(msg);*/
+
+        /*//获取网络数据
         URL url = null;
         try{
             url = new URL("https://www.usd-cny.com/bankofchina.htm");
@@ -143,16 +155,60 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
             e.printStackTrace();
         }catch (IOException e){
             e.printStackTrace();
+        }*/
+
+        //使用Jsoup解析网页数据
+        String url = "https://www.usd-cny.com/bankofchina.htm";
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(url).get();
+            Log.i(TAG,"run:" + doc.title());
+            /*Elements tables = doc.getElementsByTag("table");
+            Element table6 = tables.get(0);*/
+            Element table = doc.getElementsByTag("table").first();//获取标签为table的第一个元素，即上面两句话的意思
+
+            //获取TD中的数据
+            /*方法一
+            Elements tds = table6.getElementsByTag("td");
+            for(int i = 0;i < tds.size();i += 6){
+                Element td1 = tds.get(i);
+                Element td2 = tds.get(i + 5);
+                String str1 = td1.text();
+                String val = td2.text();
+                //Log.i(TAG,"run:" + str1 + "==>" + val);
+                float v = 100f / Float.parseFloat(val);
+                Log.i(TAG,"run:" + str1 + "==>" + v);
+                //获取数据并返回(还未实现，编码问题无法解决)
+                if(str1.equals("美元")){
+                    new_dollar = v;
+                }
+                if(str1.equals("欧元")){
+                    new_euro = v;
+                }
+                if(str1.equals("韩元")){
+                    new_won = v;
+                }
+            }*/
+            //方法二
+            Elements trs = table.getElementsByTag("tr");
+            for(Element tr : trs){
+                Elements tds = tr.getElementsByTag("td");
+                if(tds.size() > 0){
+                    //get data
+                    String td1 = tds.get(0).text();
+                    String td2 = tds.get(5).text();
+                    float v = 100f / Float.parseFloat(td2);
+                    Log.i(TAG,"run:" + td1 + "==>" + v);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        /*//获取msg对象，用于返回主线程
-        Message msg = handler.obtainMessage(5);
-        //msg.what = 5;
-        msg.obj = "Hello from run()";
-        handler.sendMessage(msg);*/
     }
 
-    //输入流转字符串
+    /*//输入流转字符串
     private String inputStream2String(InputStream inputStream) throws IOException {
         final int bufferSize = 1024;
         final char[] buffer = new char[bufferSize];
@@ -166,5 +222,5 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
             out.append(buffer,0,rsz);
         }
         return out.toString();
-    }
+    }*/
 }
