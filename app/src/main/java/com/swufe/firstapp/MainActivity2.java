@@ -200,6 +200,7 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
                     float v = 100f / Float.parseFloat(td2);
                     //float rate =(float)(Math.round(v*100))/100;//取两位小数
                     Log.i(TAG,"run:" + td1 + "==>" + v);
+
                     //获取数据并返回(还未实现，编码问题无法解决)
                     if(td1.equals("美元")){
                         new_dollar = v;
