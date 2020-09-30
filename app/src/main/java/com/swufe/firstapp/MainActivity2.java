@@ -91,12 +91,12 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
         new_won = Float.parseFloat(woRate.getText().toString());
 
         //使用SharedPreferences对象保存数据
-        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putFloat("dollar_rate",new_dollar);
-        editor.putFloat("euro_rate",new_euro);
-        editor.putFloat("won_rate",new_won);
-        editor.apply();
+        SharedPreferences sp1 = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor1 = sp1.edit();
+        editor1.putFloat("dollar_rate",new_dollar);
+        editor1.putFloat("euro_rate",new_euro);
+        editor1.putFloat("won_rate",new_won);
+        editor1.apply();
 
         //使用Bundle传递参数
         Intent inte = getIntent();
@@ -198,9 +198,34 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
                     String td1 = tds.get(0).text();
                     String td2 = tds.get(5).text();
                     float v = 100f / Float.parseFloat(td2);
+                    //float rate =(float)(Math.round(v*100))/100;//取两位小数
                     Log.i(TAG,"run:" + td1 + "==>" + v);
+                    //获取数据并返回(还未实现，编码问题无法解决)
+                    if(td1.equals("美元")){
+                        new_dollar = v;
+                        Log.i(TAG,"run:" + td1 + "==>" + new_dollar);
+                        dolRate.setText(String.valueOf(new_dollar));
+                    }
+                    if(td1.equals("欧元")){
+                        new_euro = v;
+                        Log.i(TAG,"run:" + td1 + "==>" + new_euro);
+                        eurRate.setText(String.valueOf(new_euro));
+                    }
+                    if(td1.equals("韩元")){
+                        new_won = v;
+                        Log.i(TAG,"run:" + td1 + "==>" + new_won);
+                        woRate.setText(String.valueOf(new_won));
+                    }
                 }
             }
+
+            //使用SharedPreferences对象保存数据
+            SharedPreferences sp2 = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+            SharedPreferences.Editor editor2 = sp2.edit();
+            editor2.putFloat("dollar_rate",new_dollar);
+            editor2.putFloat("euro_rate",new_euro);
+            editor2.putFloat("won_rate",new_won);
+            editor2.apply();
 
         } catch (IOException e) {
             e.printStackTrace();

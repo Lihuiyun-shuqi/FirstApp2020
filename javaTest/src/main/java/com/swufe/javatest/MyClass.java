@@ -18,14 +18,8 @@ public class MyClass {
         Document doc = null;
         try {
             doc = Jsoup.connect(url).get();
-            System.out.println(doc.charset());
-            doc.charset(Charset.forName("ISO8859-1"));
-            System.out.println(doc.charset());
-            //doc = Jsoup.parse(new URL(url).openStream(),"gb2312",url);
-            //String tit = new String(doc.text().getBytes("gb2312"),"UTF-8");
-            //String ti = new String(doc.body().toString().getBytes("gbk"),"UTF-8");
-            System.out.println(doc.title());
-
+            String title_doc = new String(doc.title().toString().getBytes("utf-8"),"gbk");
+            System.out.println(title_doc);
 
             Element table = doc.getElementsByTag("table").first();
             //获取TD中的数据
@@ -37,23 +31,25 @@ public class MyClass {
                     String td2 = tds.get(5).text();
                     float v = 100f / Float.parseFloat(td2);
                     //System.out.println(td1 + "==>" + v);
+                    String str = new String(td1.toString().getBytes("utf-8"),"gbk");
+                    if(str.equals("美元")){
+                        new_dollar = v;
+                    }
+                    if(str.equals("欧元")){
+                        new_euro = v;
+                    }
+                    if(str.equals("韩元")){
+                        new_won = v;
+                    }
                 }
             }
-                /*if(str1.equals("美元")){
-                    new_dollar = v;
-                }
-                if(str1.equals("欧元")){
-                    new_euro = v;
-                }
-                if(str1.equals("韩元")){
-                    new_won = v;
-                }*/
-            /*System.out.println("美元 ==>" + new_dollar);
+            System.out.println("美元 ==>" + new_dollar);
             System.out.println("欧元 ==>" + new_euro);
-            System.out.println("韩元 ==>" + new_won);*/
+            System.out.println("韩元 ==>" + new_won);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }
