@@ -134,7 +134,7 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
         bdl_ret.putFloat("euro_rate_key",new_euro);
         bdl_ret.putFloat("won_rate_key",new_won);
         inte.putExtras(bdl_ret);
-        setResult(3,inte);//设置resultCode及带回的数据
+        setResult(1,inte);//设置resultCode及带回的数据
 
         finish();//返回到调用页面
     }

@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode==1 && resultCode==3){
+        if(requestCode==1 && resultCode==1){
             Bundle bdl_gain_new = data.getExtras();
             dollar_rate = bdl_gain_new.getFloat("dollar_rate_key",0.1f);
             euro_rate = bdl_gain_new.getFloat("euro_rate_key",0.1f);

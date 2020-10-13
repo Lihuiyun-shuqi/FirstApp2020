@@ -7,11 +7,14 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,7 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity4 extends AppCompatActivity implements Runnable{
+public class MainActivity4 extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener{
     private static final String TAG = "MainActivity4";
     ListView myList;
     Handler handler;
@@ -47,13 +50,14 @@ public class MainActivity4 extends AppCompatActivity implements Runnable{
         handler = new Handler(){
             @Override
             public void handleMessage(Message msg){
-                if(msg.what == 5){
+                if(msg.what == 6){
                     ArrayList<HashMap<String,String>> dataList = (ArrayList<HashMap<String,String>>) msg.obj;
 
                     MyAdapter myAdapter = new MyAdapter(MainActivity4.this,
                             R.layout.list_item,
                             dataList);
                     myList.setAdapter(myAdapter);
+                    myList.setOnItemClickListener(MainActivity4.this);//添加事件监听
                 }
                 super.handleMessage(msg);
             }
@@ -89,7 +93,7 @@ public class MainActivity4 extends AppCompatActivity implements Runnable{
                 }
             }
 
-            Message msg = handler.obtainMessage(5);
+            Message msg = handler.obtainMessage(6);
             msg.obj = list;
             handler.sendMessage(msg);
 
@@ -98,32 +102,38 @@ public class MainActivity4 extends AppCompatActivity implements Runnable{
         }
     }
 
-    //自定义适配器Adapter
-    public class MyAdapter extends ArrayAdapter {
-        private static final String TAG = "MyAdapter";
-        public MyAdapter(Context context,
-                         int resource,
-                         ArrayList<HashMap<String,String>> list) {
-            super(context, resource, list);
-        }
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //重写方法，对点击ListView后进行操作
+        Object itemAtPosition = myList.getItemAtPosition(position);//获取ListView中点击的数据
+        HashMap<String,String> map = (HashMap<String, String>) itemAtPosition;
+        String titleStr = map.get("ItemTitle");
+        String detailStr = map.get("ItemDetail");
+        Float curr_rate = Float.parseFloat(detailStr);
+        Log.i(TAG, "onItemClick: titleStr=" + titleStr);
+        Log.i(TAG, "onItemClick: detailStr=" + detailStr);
+
+
+        /*TextView title = (TextView) view.findViewById(R.id.itemTitle);
+        TextView detail = (TextView) view.findViewById(R.id.itemDetail);
+        String title2 = String.valueOf(title.getText());
+        String detail2 = String.valueOf(detail.getText());
+        Log.i(TAG, "onItemClick: title2=" + title2);
+        Log.i(TAG, "onItemClick: detail2=" + detail2);*/
+
+
+        Intent config_new = new Intent(this,MainActivity5.class);
+        //传递参数
+        Bundle bdl = new Bundle();
+        bdl.putString("itemTitle",titleStr);
+        bdl.putFloat("itemDetail",curr_rate);
+        config_new.putExtras(bdl);
+
+        Log.i(TAG,"openOne:itemTitle="+titleStr);
+        Log.i(TAG,"openOne:itemDetail="+curr_rate);
+        //打开新页面
+        startActivity(config_new);
     }
-
-    /*@Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View itemView = convertView;
-        if(itemView == null){
-            itemView = LayoutInflater.from(MainActivity4.this).inflate(R.layout.list_item,
-                    parent,
-                    false);
-        }
-        Map<String,String> map = (Map<String, String>) getItem(position);
-        TextView title = (TextView) itemView.findViewById(R.id.itemTitle);
-        TextView detail = (TextView) itemView.findViewById(R.id.itemDetail);
-        title.setText(map.get("ItemTitle"));
-        detail.setText(map.get("ItemDetail"));
-        return itemView;
-    }*/
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {//启用菜单项
