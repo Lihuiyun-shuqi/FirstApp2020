@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -23,10 +25,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity3 extends AppCompatActivity implements Runnable{
+public class MainActivity3 extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener{
     private static final String TAG = "MainActivity3";
     ListView myList;
     Handler handler;
+    List<HashMap<String,String>> dataList;
+    SimpleAdapter listItemAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,21 +53,23 @@ public class MainActivity3 extends AppCompatActivity implements Runnable{
         handler = new Handler(){
             @Override
             public void handleMessage(Message msg){
-                if(msg.what == 5){
+                if(msg.what == 5) {
                     //String str = (String)msg.obj;
                     //Log.i(TAG,"handleMessage:getMessage msg = " + str);
-                    List<HashMap<String,String>> dataList = (List<HashMap<String,String>>) msg.obj;
-                    ListAdapter listItemAdapter = new SimpleAdapter(MainActivity3.this,
+                    dataList = (List<HashMap<String, String>>) msg.obj;
+                    //ListAdapter listItemAdapter = new SimpleAdapter....
+                    listItemAdapter = new SimpleAdapter(MainActivity3.this,
                             dataList,
                             R.layout.list_item,
-                            new String[]{"ItemTitle","ItemDetail"},
-                            new int[]{R.id.itemTitle,R.id.itemDetail});
+                            new String[]{"ItemTitle", "ItemDetail"},
+                            new int[]{R.id.itemTitle, R.id.itemDetail});
                     myList.setAdapter(listItemAdapter);
+                    //myList.setEmptyView(findViewById(R.id.nodata));//列表空数据视图，当列表没有数据时显示设置（需先注释掉子线程中的获取数据的那部分代码，使得传回来的数据为空）
+                    myList.setOnItemClickListener(MainActivity3.this);//添加事件监听
                 }
                 super.handleMessage(msg);
             }
         };
-
 
     }
 
@@ -91,37 +97,12 @@ public class MainActivity3 extends AppCompatActivity implements Runnable{
         msg.obj = "Hello from run()";
         handler.sendMessage(msg);*/
 
-        /*//获取网络数据
-        URL url = null;
-        try{
-            url = new URL("https://www.usd-cny.com/bankofchina.htm");
-            HttpsURLConnection http = (HttpsURLConnection)url.openConnection();
-            InputStream in = http.getInputStream();
-
-            String html = inputStream2String(in);
-            Log.i(TAG,"run:html = " + html);
-
-            //获取msg对象，用于返回主线程
-            Message msg = handler.obtainMessage(5);
-            //msg.what = 5;
-            //msg.obj = "Hello from run()";
-            msg.obj = html;
-            handler.sendMessage(msg);
-
-        }catch (MalformedURLException e){
-            e.printStackTrace();
-        }catch (IOException e){
-            e.printStackTrace();
-        }*/
-
         //使用Jsoup解析网页数据
         String url = "https://www.usd-cny.com/bankofchina.htm";
         Document doc = null;
         try {
             doc = Jsoup.connect(url).get();
             Log.i(TAG,"run:" + doc.title());
-            /*Elements tables = doc.getElementsByTag("table");
-            Element table6 = tables.get(0);*/
             Element table = doc.getElementsByTag("table").first();//获取标签为table的第一个元素，即上面两句话的意思
 
             //获取TD中的数据
@@ -145,7 +126,6 @@ public class MainActivity3 extends AppCompatActivity implements Runnable{
             Message msg = handler.obtainMessage(5);
             msg.obj = list;
             handler.sendMessage(msg);
-
 
             //方法二
             /*Elements trs = table.getElementsByTag("tr");
@@ -183,4 +163,17 @@ public class MainActivity3 extends AppCompatActivity implements Runnable{
 
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Object itemAtPosition = myList.getItemAtPosition(position);//获取ListView中点击的数据
+        HashMap<String,String> map = (HashMap<String, String>) itemAtPosition;
+        String titleStr = map.get("ItemTitle");
+        String detailStr = map.get("ItemDetail");
+
+        //SimpleAdapter类型的列表数据项删除
+        dataList.remove(position);//删除数据项
+        listItemAdapter.notifyDataSetChanged();//更新适配器
+
+        Log.i(TAG, "onItemClick: 删除的数据为：titleStr= " + titleStr + " , detailStr= " + detailStr);
+    }
 }

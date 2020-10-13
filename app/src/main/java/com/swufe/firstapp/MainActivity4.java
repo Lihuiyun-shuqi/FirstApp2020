@@ -1,10 +1,12 @@
 package com.swufe.firstapp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import org.jsoup.Jsoup;
@@ -29,10 +32,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity4 extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener{
+public class MainActivity4 extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener{
     private static final String TAG = "MainActivity4";
     ListView myList;
     Handler handler;
+    ArrayList<HashMap<String,String>> dataList;
+    MyAdapter myAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +56,15 @@ public class MainActivity4 extends AppCompatActivity implements Runnable, Adapte
             @Override
             public void handleMessage(Message msg){
                 if(msg.what == 6){
-                    ArrayList<HashMap<String,String>> dataList = (ArrayList<HashMap<String,String>>) msg.obj;
+                    dataList = (ArrayList<HashMap<String,String>>) msg.obj;
 
-                    MyAdapter myAdapter = new MyAdapter(MainActivity4.this,
+                    myAdapter = new MyAdapter(MainActivity4.this,
                             R.layout.list_item,
-                            dataList);
+                            dataList);//自定义适配器
                     myList.setAdapter(myAdapter);
-                    myList.setOnItemClickListener(MainActivity4.this);//添加事件监听
+
+                    myList.setOnItemClickListener(MainActivity4.this);//添加单击事件监听
+                    myList.setOnItemLongClickListener(MainActivity4.this);//添加长按事件监听
                 }
                 super.handleMessage(msg);
             }
@@ -105,31 +112,22 @@ public class MainActivity4 extends AppCompatActivity implements Runnable, Adapte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         //重写方法，对点击ListView后进行操作
-        Object itemAtPosition = myList.getItemAtPosition(position);//获取ListView中点击的数据
-        HashMap<String,String> map = (HashMap<String, String>) itemAtPosition;
-        String titleStr = map.get("ItemTitle");
-        String detailStr = map.get("ItemDetail");
-        Float curr_rate = Float.parseFloat(detailStr);
-        Log.i(TAG, "onItemClick: titleStr=" + titleStr);
-        Log.i(TAG, "onItemClick: detailStr=" + detailStr);
-
-
-        /*TextView title = (TextView) view.findViewById(R.id.itemTitle);
-        TextView detail = (TextView) view.findViewById(R.id.itemDetail);
-        String title2 = String.valueOf(title.getText());
-        String detail2 = String.valueOf(detail.getText());
-        Log.i(TAG, "onItemClick: title2=" + title2);
-        Log.i(TAG, "onItemClick: detail2=" + detail2);*/
-
+        Object itemAtPosition1 = myList.getItemAtPosition(position);//获取ListView中点击的数据
+        HashMap<String,String> map1 = (HashMap<String, String>) itemAtPosition1;
+        String titleStr1 = map1.get("ItemTitle");
+        String detailStr1 = map1.get("ItemDetail");
+        Float curr_rate = Float.parseFloat(detailStr1);
+        Log.i(TAG, "onItemClick: titleStr=" + titleStr1);
+        Log.i(TAG, "onItemClick: detailStr=" + detailStr1);
 
         Intent config_new = new Intent(this,MainActivity5.class);
         //传递参数
         Bundle bdl = new Bundle();
-        bdl.putString("itemTitle",titleStr);
+        bdl.putString("itemTitle",titleStr1);
         bdl.putFloat("itemDetail",curr_rate);
         config_new.putExtras(bdl);
 
-        Log.i(TAG,"openOne:itemTitle="+titleStr);
+        Log.i(TAG,"openOne:itemTitle="+titleStr1);
         Log.i(TAG,"openOne:itemDetail="+curr_rate);
         //打开新页面
         startActivity(config_new);
@@ -154,5 +152,34 @@ public class MainActivity4 extends AppCompatActivity implements Runnable, Adapte
         setResult(2,inte);
 
         finish();//返回到调用页面
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        final int pp = position;
+        //长按处理
+        Object itemAtPosition2 = myList.getItemAtPosition(position);//获取ListView中点击的数据
+        HashMap<String,String> map2 = (HashMap<String, String>) itemAtPosition2;
+        final String titleStr2 = map2.get("ItemTitle");
+        final String detailStr2 = map2.get("ItemDetail");
+
+        //AlertDialog对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(" 提示")
+                .setMessage(" 请确认是否删除当前数据 ")
+                .setPositiveButton(" 是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.i(TAG, "onClick:  对话框事件处理");
+                        //删除数据项
+                        dataList.remove(pp);
+                        //更新适配器
+                        myAdapter.notifyDataSetChanged();
+                        Log.i(TAG, "onItemClick: 删除的数据为：titleStr= " + titleStr2 + " , detailStr= " + detailStr2);
+                    }
+                }).setNegativeButton(" 否", null);
+        builder.create().show();
+
+        return true;//如果返回false，则会在松开点击鼠标后弹出单击事件的处理
     }
 }
