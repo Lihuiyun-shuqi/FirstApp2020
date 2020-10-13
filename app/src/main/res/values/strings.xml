@@ -7,4 +7,6 @@
     <string name="btn_config">CONFIG</string>
     <string name="btn_save_config">SAVE</string>
     <string name="menu1">Setting</string>
+    <string name="btn_rate_list">Rate List</string>
+    <string name="retur">Return</string>
 </resources>

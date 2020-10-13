@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void open_new(View v){
         Intent config = new Intent(this,MainActivity2.class);
+        //Intent config = new Intent(this,MainActivity3.class);
         //使用putExtra传递参数
         /*config.putExtra("dollar_rate_key",dollar_rate);
         config.putExtra("euro_rate_key",euro_rate);

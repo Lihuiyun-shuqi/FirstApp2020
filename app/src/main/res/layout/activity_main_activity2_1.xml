@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context=".MainActivity2" >
+    tools:context=".MainActivity2_1" >
 
     <EditText
         android:id="@+id/dollarRate"
@@ -35,18 +35,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="30dp"
         android:onClick="saveconfig_return"
         android:text="@string/btn_save_config" />
 
-    <Button
-        android:id="@+id/btn_rate_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="30dp"
-        android:onClick="newRateList"
-        android:text="@string/btn_rate_list" />
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/mylist" />
 
 </LinearLayout>

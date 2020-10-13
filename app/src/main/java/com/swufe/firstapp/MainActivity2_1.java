@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,26 +29,22 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity2 extends AppCompatActivity implements Runnable{
-    private static final String TAG = "MainActivity2";
+public class MainActivity2_1 extends AppCompatActivity implements Runnable{
+    private static final String TAG = "MainActivity2_1";
     EditText dolRate,eurRate,woRate;
+    ListView myList;
     Handler handler;
     float new_dollar,new_euro,new_won;
-    String todayDate,lastUpdateDate;
-    SharedPreferences sp2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_main_activity2_1);
 
         Intent intent = getIntent();
         //使用putExtra传递参数时获取数据
@@ -75,39 +70,35 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
         eurRate.setText(String.valueOf(euro2));
         woRate.setText(String.valueOf(won2));
 
-        //实现每天更新一次汇率，而不是每次打开都更新：从xml文件中取出上次更新的日期，若与今天日期不相同则更新数据，否则不更新
-        sp2 = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        //获取ListView控件
+        myList = (ListView) findViewById(R.id.mylist);
+        //简单数据测试：使用ListView控件，把获取的数据以列表形式展示出来
+        /*String data[] = {"one","two","three","four"};
+        ListAdapter adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,data);
+        myList.setAdapter(adapter);*/
 
-        Date today = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        todayDate = format.format(today);
-        lastUpdateDate = sp2.getString("update_date", "");
-        Log.i(TAG, "onCreate: 不需要更新! 上次更新日期：" + lastUpdateDate);
+        //开启子线程
+        Thread t = new Thread(this);
+        t.start();
 
-        if(!lastUpdateDate.equals(todayDate)){
-            Log.i(TAG, "onCreate: 需要更新! 上次更新日期：" + lastUpdateDate + ",本次更新日期：" + todayDate);
-            Thread t = new Thread(this);
-            t.start();
-
-            handler = new Handler(){
-                @Override
-                public void handleMessage(Message msg){
-                    if(msg.what == 5){
-                        HashMap<String,Float> dataMap = (HashMap<String,Float>) msg.obj;
-                        SharedPreferences.Editor editor2 = sp2.edit();
-                        new_dollar = dataMap.get("dollar_rate");
-                        new_euro = dataMap.get("euro_rate");
-                        new_won = dataMap.get("won_rate");
-                        editor2.putFloat("dollar_rate",new_dollar);
-                        editor2.putFloat("euro_rate",new_euro);
-                        editor2.putFloat("won_rate",new_won);
-                        editor2.putString("update_date", todayDate);
-                        editor2.apply();
-                    }
-                    super.handleMessage(msg);
+        //线程间消息同步
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                if(msg.what == 5){
+                    //String str = (String)msg.obj;
+                    //Log.i(TAG,"handleMessage:getMessage msg = " + str);
+                    List<String> dataList = (List<String>) msg.obj;
+                    ListAdapter adapter = new ArrayAdapter<String>(MainActivity2_1.this,
+                            android.R.layout.simple_list_item_1,
+                            dataList);
+                    myList.setAdapter(adapter);
                 }
-            };
-        }
+                super.handleMessage(msg);
+            }
+        };
+
+
     }
 
     public void saveconfig_return(View btn){
@@ -227,7 +218,7 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
 
             //方法二
             Elements trs = table.getElementsByTag("tr");
-            HashMap<String,Float> map = new HashMap<String,Float>();
+            List<String> list = new ArrayList<String>();
             for(Element tr : trs){
                 Elements tds = tr.getElementsByTag("td");
                 if(tds.size() > 0){
@@ -237,31 +228,37 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
                     float v = 100f / Float.parseFloat(td2);
                     //float rate =(float)(Math.round(v*100))/100;//取两位小数
                     Log.i(TAG,"run:" + td1 + "==>" + v);
+                    list.add(td1 + "==>" + v);
                     //获取数据并返回
                     if(td1.equals("美元")){
                         new_dollar = v;
                         Log.i(TAG,"run:" + td1 + "==>" + new_dollar);
                         dolRate.setText(String.valueOf(new_dollar));
-                        map.put("dollar_rate",new_dollar);
                     }
                     if(td1.equals("欧元")){
                         new_euro = v;
                         Log.i(TAG,"run:" + td1 + "==>" + new_euro);
                         eurRate.setText(String.valueOf(new_euro));
-                        map.put("euro_rate",new_euro);
                     }
                     if(td1.equals("韩元")){
                         new_won = v;
                         Log.i(TAG,"run:" + td1 + "==>" + new_won);
                         woRate.setText(String.valueOf(new_won));
-                        map.put("won_rate",new_won);
                     }
                 }
             }
 
             Message msg = handler.obtainMessage(5);
-            msg.obj = map;
+            msg.obj = list;
             handler.sendMessage(msg);
+
+            //使用SharedPreferences对象保存数据
+            SharedPreferences sp2 = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+            SharedPreferences.Editor editor2 = sp2.edit();
+            editor2.putFloat("dollar_rate",new_dollar);
+            editor2.putFloat("euro_rate",new_euro);
+            editor2.putFloat("won_rate",new_won);
+            editor2.apply();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -284,17 +281,4 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
         }
         return out.toString();
     }*/
-
-    public void newRateList(View v){
-        Intent config1 = new Intent(this,MainActivity4.class);
-        startActivityForResult(config1,2);//打开可返回数据的窗口
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode==2 && resultCode==2){
-
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 }
