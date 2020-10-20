@@ -1,8 +1,10 @@
 package com.swufe.firstapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -28,8 +30,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity4 extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener{
@@ -38,6 +43,8 @@ public class MainActivity4 extends AppCompatActivity implements Runnable, Adapte
     Handler handler;
     ArrayList<HashMap<String,String>> dataList;
     MyAdapter myAdapter;
+    String todayDate,lastUpdateDate;
+    SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,16 +54,20 @@ public class MainActivity4 extends AppCompatActivity implements Runnable, Adapte
         //获取ListView控件
         myList = (ListView) findViewById(R.id.mylist2);
 
+        //实现每天更新一次汇率，而不是每次打开都更新：从xml文件中取出上次更新的日期，若与今天日期不相同则更新数据，否则不更新
+        sp = getSharedPreferences("myrate_date", Activity.MODE_PRIVATE);
+        lastUpdateDate = sp.getString("update_date", "");
+
         //开启子线程
         Thread t = new Thread(this);
         t.start();
 
         //线程间消息同步
-        handler = new Handler(){
+        handler = new Handler() {
             @Override
-            public void handleMessage(Message msg){
-                if(msg.what == 6){
-                    dataList = (ArrayList<HashMap<String,String>>) msg.obj;
+            public void handleMessage(Message msg) {
+                if (msg.what == 6) {
+                    dataList = (ArrayList<HashMap<String, String>>) msg.obj;
 
                     myAdapter = new MyAdapter(MainActivity4.this,
                             R.layout.list_item,
@@ -69,44 +80,80 @@ public class MainActivity4 extends AppCompatActivity implements Runnable, Adapte
                 super.handleMessage(msg);
             }
         };
-
     }
 
     @Override
     public void run() {
-        String url = "https://www.usd-cny.com/bankofchina.htm";
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(url).get();
-            //Log.i(TAG,"run:" + doc.title());
-            Element table = doc.getElementsByTag("table").first();
+        ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
 
-            //获取TD中的数据
-            Elements trs = table.getElementsByTag("tr");
-            ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
-            for(Element tr : trs){
-                Elements tds = tr.getElementsByTag("td");
-                if(tds.size() > 0){
-                    //get data
-                    String td1 = tds.get(0).text();
-                    String td2 = tds.get(5).text();
-                    float v = 100f / Float.parseFloat(td2);
-                    //float rate =(float)(Math.round(v*100))/100;//取两位小数
-                    //Log.i(TAG,"run:" + td1 + "==>" + v);
-                    HashMap<String,String> map = new HashMap<String,String>();
-                    map.put("ItemTitle",td1);
-                    map.put("ItemDetail",String.valueOf(v));
-                    list.add(map);
+        todayDate = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
+        Log.i("run","todayDateStr: " + todayDate + " lastUpdateDateStr: " + lastUpdateDate);
+
+        if(todayDate.equals(lastUpdateDate)){
+            //日期如果相等，则不从网络中获取数据，从数据库中获取数据
+            Log.i("run","日期相等，不需要更新！从数据库中获取数据");
+            RateManager rateManager1 = new RateManager(this);
+            for(RateItem rateItem : rateManager1.listAll()){
+                HashMap<String,String> map1 = new HashMap<String,String>();
+                map1.put("ItemTitle",rateItem.getCurname());
+                map1.put("ItemDetail",rateItem.getCurrate());
+                list.add(map1);
+            }
+        }else{
+            //日期不相等，则从网络中获取数据
+            Log.i("run","日期不相等，需要更新！从网络中获取数据");
+
+            String url = "https://www.usd-cny.com/bankofchina.htm";
+            Document doc = null;
+            List<RateItem> rateList = new ArrayList<RateItem>();
+            try {
+                doc = Jsoup.connect(url).get();
+                //Log.i(TAG,"run:" + doc.title());
+                Element table = doc.getElementsByTag("table").first();
+
+                //获取TD中的数据
+                Elements trs = table.getElementsByTag("tr");
+                //RateManager rateManager = new RateManager(this);
+
+                for(Element tr : trs){
+                    Elements tds = tr.getElementsByTag("td");
+                    if(tds.size() > 0){
+                        //get data
+                        String td1 = tds.get(0).text();
+                        String td2 = tds.get(5).text();
+                        float v = 100f / Float.parseFloat(td2);
+                        //float rate =(float)(Math.round(v*100))/100;//取两位小数
+                        //Log.i(TAG,"run:" + td1 + "==>" + v);
+
+                        RateItem rateItem = new RateItem(td1,String.valueOf(v));
+                        rateList.add(rateItem);
+
+                        HashMap<String,String> map2 = new HashMap<String,String>();
+                        map2.put("ItemTitle",td1);
+                        map2.put("ItemDetail",String.valueOf(v));
+                        list.add(map2);
+                    }
                 }
+
+                RateManager rateManager2 = new RateManager(this);
+                rateManager2.deleteAll();
+                Log.i("db","删除所有记录");
+                rateManager2.addAll(rateList);
+                Log.i("db","添加新记录集");
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-            Message msg = handler.obtainMessage(6);
-            msg.obj = list;
-            handler.sendMessage(msg);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            //更新记录日期
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("update_date", todayDate);
+            editor.apply();
+            Log.i("run","更新日期结束：" + todayDate);
         }
+        Message msg = handler.obtainMessage(6);
+        msg.obj = list;
+        handler.sendMessage(msg);
     }
 
     @Override

@@ -77,37 +77,28 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
 
         //实现每天更新一次汇率，而不是每次打开都更新：从xml文件中取出上次更新的日期，若与今天日期不相同则更新数据，否则不更新
         sp2 = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
-
-        Date today = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        todayDate = format.format(today);
         lastUpdateDate = sp2.getString("update_date", "");
-        Log.i(TAG, "onCreate: 不需要更新! 上次更新日期：" + lastUpdateDate);
 
-        if(!lastUpdateDate.equals(todayDate)){
-            Log.i(TAG, "onCreate: 需要更新! 上次更新日期：" + lastUpdateDate + ",本次更新日期：" + todayDate);
-            Thread t = new Thread(this);
-            t.start();
+        Thread t = new Thread(this);
+        t.start();
 
-            handler = new Handler(){
-                @Override
-                public void handleMessage(Message msg){
-                    if(msg.what == 5){
-                        HashMap<String,Float> dataMap = (HashMap<String,Float>) msg.obj;
-                        SharedPreferences.Editor editor2 = sp2.edit();
-                        new_dollar = dataMap.get("dollar_rate");
-                        new_euro = dataMap.get("euro_rate");
-                        new_won = dataMap.get("won_rate");
-                        editor2.putFloat("dollar_rate",new_dollar);
-                        editor2.putFloat("euro_rate",new_euro);
-                        editor2.putFloat("won_rate",new_won);
-                        editor2.putString("update_date", todayDate);
-                        editor2.apply();
-                    }
-                    super.handleMessage(msg);
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                if(msg.what == 5){
+                    HashMap<String,String> dataMap = (HashMap<String,String>) msg.obj;
+                    SharedPreferences.Editor editor2 = sp2.edit();
+                    new_dollar = Float.parseFloat(dataMap.get("dollar_rate"));
+                    new_euro = Float.parseFloat(dataMap.get("euro_rate"));
+                    new_won = Float.parseFloat(dataMap.get("won_rate"));
+                    editor2.putFloat("dollar_rate",new_dollar);
+                    editor2.putFloat("euro_rate",new_euro);
+                    editor2.putFloat("won_rate",new_won);
+                    editor2.apply();
                 }
-            };
-        }
+                super.handleMessage(msg);
+            }
+        };
     }
 
     public void saveconfig_return(View btn){
@@ -155,7 +146,7 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
 
     @Override
     public void run() {
-        Log.i(TAG,"run:run().....");
+        Log.i(TAG, "run:run().....");
 
         //获取msg对象，用于返回主线程
         /*Message msg = handler.obtainMessage(5);
@@ -186,87 +177,97 @@ public class MainActivity2 extends AppCompatActivity implements Runnable{
             e.printStackTrace();
         }*/
 
-        //使用Jsoup解析网页数据
-        String url = "https://www.usd-cny.com/bankofchina.htm";
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(url).get();
-            Log.i(TAG,"run:" + doc.title());
-            /*Elements tables = doc.getElementsByTag("table");
-            Element table6 = tables.get(0);*/
-            Element table = doc.getElementsByTag("table").first();//获取标签为table的第一个元素，即上面两句话的意思
+        HashMap<String, String> map = new HashMap<String, String>();
 
-            //获取TD中的数据
-            //方法一
-            /*Elements tds = table.getElementsByTag("td");
-            for(int i = 0;i < tds.size();i += 6){
-                Element td1 = tds.get(i);
-                Element td2 = tds.get(i + 5);
-                String str1 = td1.text();
-                String val = td2.text();
-                //Log.i(TAG,"run:" + str1 + "==>" + val);
-                float v = 100f / Float.parseFloat(val);
-                Log.i(TAG,"run:" + str1 + "==>" + v);
-                //获取数据并返回
-                if(str1.equals("美元")){
-                    new_dollar = v;
-                    Log.i(TAG,"run:" + str1 + "==>" + new_dollar);
-                    dolRate.setText(String.valueOf(new_dollar));
-                }
-                if(str1.equals("欧元")){
-                    new_euro = v;
-                    Log.i(TAG,"run:" + str1 + "==>" + new_euro);
-                    eurRate.setText(String.valueOf(new_euro));
-                }
-                if(str1.equals("韩元")){
-                    new_won = v;
-                    Log.i(TAG,"run:" + str1 + "==>" + new_won);
-                    woRate.setText(String.valueOf(new_won));
-                }
-            }*/
+        todayDate = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
+        Log.i("run", "todayDateStr: " + todayDate + " lastUpdateDateStr: " + lastUpdateDate);
 
-            //方法二
-            Elements trs = table.getElementsByTag("tr");
-            HashMap<String,Float> map = new HashMap<String,Float>();
-            for(Element tr : trs){
-                Elements tds = tr.getElementsByTag("td");
-                if(tds.size() > 0){
-                    //get data
-                    String td1 = tds.get(0).text();
-                    String td2 = tds.get(5).text();
-                    float v = 100f / Float.parseFloat(td2);
-                    //float rate =(float)(Math.round(v*100))/100;//取两位小数
-                    Log.i(TAG,"run:" + td1 + "==>" + v);
-                    //获取数据并返回
-                    if(td1.equals("美元")){
-                        new_dollar = v;
-                        Log.i(TAG,"run:" + td1 + "==>" + new_dollar);
-                        dolRate.setText(String.valueOf(new_dollar));
-                        map.put("dollar_rate",new_dollar);
-                    }
-                    if(td1.equals("欧元")){
-                        new_euro = v;
-                        Log.i(TAG,"run:" + td1 + "==>" + new_euro);
-                        eurRate.setText(String.valueOf(new_euro));
-                        map.put("euro_rate",new_euro);
-                    }
-                    if(td1.equals("韩元")){
-                        new_won = v;
-                        Log.i(TAG,"run:" + td1 + "==>" + new_won);
-                        woRate.setText(String.valueOf(new_won));
-                        map.put("won_rate",new_won);
+        if (todayDate.equals(lastUpdateDate)) {
+            //日期如果相等，则不从网络中获取数据，从数据库中获取数据
+            Log.i("run", "日期相等，不需要更新！从数据库中获取数据");
+            RateManager rateManager1 = new RateManager(this);
+            RateItem rateItem1 = new RateItem();
+
+            rateItem1 = rateManager1.findByCurName("美元");
+            dolRate.setText(rateItem1.getCurrate());
+            map.put("dollar_rate", rateItem1.getCurrate());
+
+            rateItem1 = rateManager1.findByCurName("欧元");
+            eurRate.setText(rateItem1.getCurrate());
+            map.put("euro_rate", rateItem1.getCurrate());
+
+            rateItem1 = rateManager1.findByCurName("韩元");
+            woRate.setText(rateItem1.getCurrate());
+            map.put("won_rate", rateItem1.getCurrate());
+
+        } else {
+            //日期不相等，则从网络中获取数据
+            Log.i("run", "日期不相等，需要更新！从网络中获取数据");
+
+            //使用Jsoup解析网页数据
+            String url = "https://www.usd-cny.com/bankofchina.htm";
+            Document doc = null;
+            try {
+                doc = Jsoup.connect(url).get();
+                Log.i(TAG, "run:" + doc.title());
+                Element table = doc.getElementsByTag("table").first();//获取标签为table的第一个元素，即上面两句话的意思
+
+                //获取TD中的数据
+                Elements trs = table.getElementsByTag("tr");
+                List<RateItem> rateList = new ArrayList<RateItem>();
+                for (Element tr : trs) {
+                    Elements tds = tr.getElementsByTag("td");
+                    if (tds.size() > 0) {
+                        //get data
+                        String td1 = tds.get(0).text();
+                        String td2 = tds.get(5).text();
+                        float v = 100f / Float.parseFloat(td2);
+                        //float rate =(float)(Math.round(v*100))/100;//取两位小数
+                        Log.i(TAG, "run:" + td1 + "==>" + v);
+
+                        RateItem rateItem = new RateItem(td1,String.valueOf(v));
+                        rateList.add(rateItem);
+
+                        //获取数据并返回
+                        if (td1.equals("美元")) {
+                            new_dollar = v;
+                            Log.i(TAG, "run:" + td1 + "==>" + new_dollar);
+                            dolRate.setText(String.valueOf(new_dollar));
+                            map.put("dollar_rate", String.valueOf(new_dollar));
+                        }
+                        if (td1.equals("欧元")) {
+                            new_euro = v;
+                            Log.i(TAG, "run:" + td1 + "==>" + new_euro);
+                            eurRate.setText(String.valueOf(new_euro));
+                            map.put("euro_rate", String.valueOf(new_euro));
+                        }
+                        if (td1.equals("韩元")) {
+                            new_won = v;
+                            Log.i(TAG, "run:" + td1 + "==>" + new_won);
+                            woRate.setText(String.valueOf(new_won));
+                            map.put("won_rate", String.valueOf(new_won));
+                        }
                     }
                 }
+
+                RateManager rateManager2 = new RateManager(this);
+                rateManager2.deleteAll();
+                Log.i("db","删除所有记录");
+                rateManager2.addAll(rateList);
+                Log.i("db","添加新记录集");
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            Message msg = handler.obtainMessage(5);
-            msg.obj = map;
-            handler.sendMessage(msg);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            //更新记录日期
+            SharedPreferences.Editor editor = sp2.edit();
+            editor.putString("update_date", todayDate);
+            editor.apply();
+            Log.i("run","更新日期结束：" + todayDate);
         }
-
+        Message msg = handler.obtainMessage(5);
+        msg.obj = map;
+        handler.sendMessage(msg);
     }
 
     /*//输入流转字符串
