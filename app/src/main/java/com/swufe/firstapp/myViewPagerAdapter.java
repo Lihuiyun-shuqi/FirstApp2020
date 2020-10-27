@@ -26,8 +26,9 @@ public class myViewPagerAdapter extends FragmentPagerAdapter {
         return 3;//返回的是该适配器管理的fragment页面个数
     }
 
+    /*
     @Override
     public CharSequence getPageTitle(int position){
         return "Title" + position;
-    }
+    }*/
 }

@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         dollar_rate = sp1.getFloat("dollar_rate",0.0f);
         euro_rate = sp1.getFloat("euro_rate",0.0f);
         won_rate = sp1.getFloat("won_rate",0.0f);
-
     }
 
     public void btn_convert(View btn){
